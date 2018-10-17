@@ -8,6 +8,7 @@ int done = 0;
 
 int number[3];
 int choosing[3];
+int critical[3];
 
 active[3] proctype bakeryLock(){
 	int CNT = 0;
@@ -55,8 +56,10 @@ again:
 	assert(j != 4);
 	//critcial section
 	ncs++;
+	critical[_pid] = 1;
 	assert(ncs == 1);
 	ncs--;
+	critical[_pid] = 0;
 
 	number[_pid] = 0;
 
@@ -65,7 +68,24 @@ again:
 		goto again
 	:: CNT == 4 -> done++;
 	fi
+
 	
+}
+
+ltl claim{
+	//deadlock free
+	(eventually(done == threads)) &&
+
+	//Liveness
+	(eventually(ncs)) &&
+
+	//starvation free
+	(eventually(critical[0])) &&
+	(eventually(critical[1])) &&
+	(eventually(critical[2])) &&
+
+	//safety
+	(always(ncs <= 1));
 }
 
 
